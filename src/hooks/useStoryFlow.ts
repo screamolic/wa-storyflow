@@ -232,6 +232,9 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
 
   const getHeaders = () => {
     const headers: Record<string, string> = {};
+    if (appPassword) {
+      headers["x-app-password"] = appPassword;
+    }
     if (backendConfig) {
       headers["x-whatsapp-config"] = JSON.stringify(backendConfig);
     }

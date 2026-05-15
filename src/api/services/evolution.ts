@@ -16,11 +16,11 @@ interface BackendConfig {
 }
 
 function getApiUrl(customConfig?: BackendConfig): string | undefined {
-  return customConfig?.baseUrl || process.env.EVOLUTION_API_URL;
+  return (customConfig?.baseUrl || process.env.EVOLUTION_API_URL)?.trim();
 }
 
 function getApiKey(customConfig?: BackendConfig): string | undefined {
-  return customConfig?.apiKey || process.env.EVOLUTION_API_KEY;
+  return (customConfig?.apiKey || process.env.EVOLUTION_API_KEY)?.trim();
 }
 
 function getBackendType(customConfig?: BackendConfig): string {
@@ -37,11 +37,12 @@ function normalizeBaseUrl(url: string): string {
 let _client: AxiosInstance | null = null;
 let _currentBaseUrl = "";
 let _currentApiKey = "";
+let _currentBackendType = "";
 
 function getClient(baseUrl: string, apiKey: string, backendType: string): AxiosInstance {
   const normBaseUrl = normalizeBaseUrl(baseUrl);
   
-  if (!_client || _currentBaseUrl !== normBaseUrl || _currentApiKey !== apiKey) {
+  if (!_client || _currentBaseUrl !== normBaseUrl || _currentApiKey !== apiKey || _currentBackendType !== backendType) {
     _client = axios.create({
       timeout: REQUEST_TIMEOUT_MS,
       baseURL: normBaseUrl,
@@ -56,6 +57,7 @@ function getClient(baseUrl: string, apiKey: string, backendType: string): AxiosI
     }
     _currentBaseUrl = normBaseUrl;
     _currentApiKey = apiKey;
+    _currentBackendType = backendType;
   }
   return _client;
 }
