@@ -133,6 +133,10 @@ export interface BackendConfig {
   backendType: "evolution" | "waha" | "custom";
   baseUrl: string;
   apiKey: string;
+  aiProvider?: string;
+  aiModel?: string;
+  aiEndpoint?: string;
+  aiApiKey?: string;
 }
 
 export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {

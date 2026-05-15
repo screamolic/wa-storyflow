@@ -64,15 +64,12 @@ service cloud.firestore {
       allow get: if isOwner(userId);
       allow create: if isOwner(userId)
                     && isValidId(userId)
-                    && isValidWhatsappConfig(incoming())
-                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'aiProvider', 'aiModel', 'aiEndpoint', 'aiApiKey', 'updatedAt'])
-                    && incoming().updatedAt == request.time.toMillis();
+                    && isValidWhatsappConfig(incoming());
       
       allow update: if isOwner(userId)
                     && isValidId(userId)
                     && isValidWhatsappConfig(incoming())
-                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'aiProvider', 'aiModel', 'aiEndpoint', 'aiApiKey', 'updatedAt'])
-                    && incoming().updatedAt == request.time.toMillis();
+                    && incoming().diff(existing()).affectedKeys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'aiProvider', 'aiModel', 'aiEndpoint', 'aiApiKey', 'updatedAt']);
     }
 
     match /users/{userId}/history/{historyId} {

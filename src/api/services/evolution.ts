@@ -28,7 +28,10 @@ function getBackendType(customConfig?: BackendConfig): string {
 }
 
 function normalizeBaseUrl(url: string): string {
-  return url.replace(/\/$/, "");
+  if (!url.endsWith("/")) {
+    return url + "/";
+  }
+  return url;
 }
 
 let _client: AxiosInstance | null = null;
@@ -95,15 +98,15 @@ export async function checkConnection(config?: BackendConfig): Promise<boolean> 
 
   try {
     if (backendType === "waha") {
-      await client.get("/api/sessions");
+      await client.get("api/sessions");
     } else {
-      await client.get("/instance/fetchInstances");
+      await client.get("instance/fetchInstances");
     }
     return true;
   } catch {
     try {
       if (backendType === "waha") return false;
-      await client.get("/instance/connectionState");
+      await client.get("instance/connectionState");
       return true;
     } catch {
       return false;
@@ -124,7 +127,7 @@ export async function fetchInstances(config?: BackendConfig): Promise<EvolutionI
 
   if (backendType === "waha") {
     // WAHA fetch instances
-    const response = await withRetry(() => client.get("/api/sessions"));
+    const response = await withRetry(() => client.get("api/sessions"));
     const instancesRaw = response.data || [];
     return instancesRaw.map((s: any) => ({
       instanceName: s.name,
@@ -136,7 +139,7 @@ export async function fetchInstances(config?: BackendConfig): Promise<EvolutionI
 
   // Evolution API
   const response = await withRetry(() =>
-    client.get<EvolutionInstanceRaw[]>("/instance/fetchInstances")
+    client.get<EvolutionInstanceRaw[]>("instance/fetchInstances")
   );
 
   const data = response.data;
@@ -181,7 +184,7 @@ export async function sendStatus(
       wahaPayload.caption = payload.caption;
     }
     const response = await withRetry(
-      () => client.post(`/api/sendText`, wahaPayload),
+      () => client.post(`api/sendText`, wahaPayload),
       MAX_RETRIES,
       false
     );
@@ -190,7 +193,7 @@ export async function sendStatus(
 
   // Evolution API
   const response = await withRetry(
-    () => client.post(`/message/sendStatus/${instanceName}`, payload),
+    () => client.post(`message/sendStatus/${instanceName}`, payload),
     MAX_RETRIES,
     false
   );
