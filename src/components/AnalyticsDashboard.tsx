@@ -15,7 +15,7 @@ import type { HistoryEntry, AnalyticsData } from "@/src/types";
 interface AnalyticsDashboardProps {
   analytics: AnalyticsData;
   history: HistoryEntry[];
-  onDeleteItem: (id: number) => void;
+  onDeleteItem: (id: string | number) => void;
   onRefresh: () => void;
 }
 
@@ -138,6 +138,12 @@ export default function AnalyticsDashboard({
                       <Smartphone className="w-3 h-3" />
                       {item.instance}
                     </div>
+                    {item.status === "FAILED" && item.error && (
+                      <div className="mt-2 text-[10px] text-red-600 bg-red-50 p-2 rounded-lg break-all hidden group-hover:block transition-all">
+                        <span className="font-bold block mb-0.5">Detail Error:</span>
+                        {item.error}
+                      </div>
+                    )}
                   </div>
 
                   <button

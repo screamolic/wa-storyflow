@@ -4,12 +4,13 @@ import {
   Sparkles,
   Type,
   Image as LucideImage,
-  Lock,
+  LogOut,
   Smartphone,
   RefreshCw,
   Loader2,
   AlertCircle,
   CheckCircle2,
+  Settings
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "@/src/lib/utils";
@@ -21,12 +22,15 @@ import ManualPoster from "@/src/components/ManualPoster";
 import StoryPreview from "@/src/components/StoryPreview";
 import SlideEditor from "@/src/components/SlideEditor";
 import AnalyticsDashboard from "@/src/components/AnalyticsDashboard";
+import SettingsModal from "@/src/components/SettingsModal";
 
 export default function App() {
   const [statusMessage, setStatusMessage] = useState<{ type: "success" | "error"; message: string } | null>(null);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const {
-    appPassword, setAppPassword, isLoggedIn, loginError, handleLogin, handleLogout,
+    isLoggedIn, loginError, handleLogin, handleLogout,
+    userId, backendConfig, saveBackendConfig,
     prompt, setPrompt, manualContent, setManualContent, manualBgColor, setManualBgColor,
     mode, setMode, persona, setPersona, structure, setStructure,
     autoStyling, setAutoStyling, aestheticMode, setAestheticMode,
@@ -58,12 +62,7 @@ export default function App() {
   // Login Screen
   if (!isLoggedIn) {
     return (
-      <LoginScreen
-        appPassword={appPassword}
-        onPasswordChange={setAppPassword}
-        loginError={loginError}
-        onLogin={handleLogin}
-      />
+      <LoginScreen />
     );
   }
 
@@ -85,16 +84,23 @@ export default function App() {
                 </div>
                 <h1 className="text-2xl font-bold tracking-tight">StoryFlow WA</h1>
               </div>
-              <p className="text-gray-500">Buat konten story memukau dengan AI & Evolution API</p>
+              <p className="text-gray-500">Buat konten story memukau dengan AI & WA Backend</p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center justify-end gap-3 flex-wrap">
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2 text-gray-400 hover:text-gray-800 transition-colors"
+                title="Pengaturan Backend"
+              >
+                <Settings className="w-5 h-5" />
+              </button>
               <button
                 onClick={handleLogout}
                 className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                 title="Keluar"
               >
-                <Lock className="w-5 h-5" />
+                <LogOut className="w-5 h-5" />
               </button>
               <div className={cn(
                 "px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 border transition-all",
@@ -108,8 +114,8 @@ export default function App() {
                   connectionStatus === "disconnected" ? "bg-red-500" :
                   "bg-gray-300"
                 )} />
-                {connectionStatus === "connected" ? "Evolution API Terhubung" :
-                 connectionStatus === "disconnected" ? "Evolution API Terputus" :
+                {connectionStatus === "connected" ? "Backend Terhubung" :
+                 connectionStatus === "disconnected" ? "Backend Terputus" :
                  "Memeriksa Koneksi..."}
               </div>
             </div>
@@ -130,10 +136,21 @@ export default function App() {
               </motion.div>
             )}
 
+            {/* Config warning */}
+            {!backendConfig?.baseUrl && (
+               <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-amber-900 text-sm font-medium flex items-start gap-3">
+                 <AlertCircle className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+                 <div>
+                   <p className="font-bold">Backend Belum Diatur</p>
+                   <p className="text-amber-700 text-xs mt-1">Silakan klik tombol pengaturan <Settings className="inline w-3 h-3" /> di pojok kanan atas untuk memasukkan URL backend WhatsApp (Evolution API / WAHA) Anda.</p>
+                 </div>
+               </div>
+            )}
+
             {isServerReady === false && (
               <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-amber-700 text-xs font-medium mb-4 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                Backend server tidak merespon. Pastikan server sedang berjalan.
+                Node server lokal tidak merespon. Pastikan npm run dev sedang berjalan.
               </div>
             )}
 
@@ -160,13 +177,15 @@ export default function App() {
             </div>
 
             {/* Instance Configuration */}
-            <InstanceSelector
-              instanceName={instanceName}
-              onInstanceChange={setInstanceName}
-              availableInstances={availableInstances}
-              isLoadingInstances={isLoadingInstances}
-              onRefresh={fetchInstances}
-            />
+            {backendConfig && backendConfig.baseUrl && (
+              <InstanceSelector
+                instanceName={instanceName}
+                onInstanceChange={setInstanceName}
+                availableInstances={availableInstances}
+                isLoadingInstances={isLoadingInstances}
+                onRefresh={fetchInstances}
+              />
+            )}
 
             {/* AI Mode Inputs */}
             {mode === "ai" && (
@@ -389,7 +408,7 @@ export default function App() {
                   </button>
                   <button
                     onClick={postToWA}
-                    disabled={isPosting || (format === "image" && !finalImage) || connectionStatus !== "connected"}
+                    disabled={isPosting || (format === "image" && !finalImage) || connectionStatus !== "connected" || !backendConfig}
                     className="flex-[2] bg-[#25D366] text-white p-4 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-[#1ebe57] transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-green-200"
                   >
                     {isPosting ? (
@@ -418,6 +437,13 @@ export default function App() {
           onRefresh={fetchHistory}
         />
       </div>
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        initialConfig={backendConfig}
+        onSave={saveBackendConfig}
+      />
     </div>
   );
 }

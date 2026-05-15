@@ -6,7 +6,6 @@ import helmet from "helmet";
 import { createAuthMiddleware } from "@/src/api/middleware/auth";
 import healthRoutes from "@/src/api/routes/health";
 import instancesRoutes from "@/src/api/routes/instances";
-import historyRoutes from "@/src/api/routes/history";
 import postStoryRoutes from "@/src/api/routes/post-story";
 
 dotenv.config();
@@ -52,7 +51,6 @@ async function startServer() {
   // Register route modules
   app.use("/api", healthRoutes);
   app.use("/api", instancesRoutes);
-  app.use("/api", historyRoutes);
   app.use("/api", postStoryRoutes);
 
   // Vite middleware (dev) or static files (production)

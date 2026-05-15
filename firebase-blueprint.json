@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "whatsappConfig": {
+      "title": "WhatsApp Configuration",
+      "description": "Stores user's selected backend, base URL, instance, and API key for WhatsApp automation.",
+      "type": "object",
+      "properties": {
+        "backendType": {
+          "type": "string",
+          "enum": ["evolution", "waha", "custom"]
+        },
+        "baseUrl": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "instanceName": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Timestamp of last update"
+        }
+      },
+      "required": ["backendType", "baseUrl", "updatedAt"]
+    },
+    "historyEntry": {
+      "title": "History Entry",
+      "description": "A single successful or failed WhatsApp posting history.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "timestamp": {
+          "type": "number"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["text", "image"]
+        },
+        "instance": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["SUCCESS", "FAILED"]
+        },
+        "preview": {
+          "type": "string"
+        },
+        "details": {
+          "type": "string"
+        },
+        "error": {
+          "type": "string"
+        }
+      },
+      "required": ["userId", "timestamp", "type", "instance", "status", "preview"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/whatsappConfig/default": {
+      "schema": {
+        "$ref": "#/entities/whatsappConfig"
+      },
+      "description": "The user's default WhatsApp configuration."
+    },
+    "/users/{userId}/history/{historyId}": {
+      "schema": {
+        "$ref": "#/entities/historyEntry"
+      },
+      "description": "User's WhatsApp posting history."
+    }
+  }
+}

@@ -63,18 +63,6 @@ export interface PostStoryRequest {
   instanceName?: string;
 }
 
-export interface ActivityLogEntry {
-  id: number;
-  timestamp: string;
-  type: "text" | "image";
-  instance: string;
-  status: "SUCCESS" | "FAILED";
-  preview: string;
-  details?: string;
-  error?: string;
-  response?: unknown;
-}
-
 export interface SuccessResponse {
   success: boolean;
 }

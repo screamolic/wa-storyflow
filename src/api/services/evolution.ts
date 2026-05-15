@@ -7,45 +7,56 @@ import type {
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1500;
-const REQUEST_TIMEOUT_MS = 60000; // Increased to 60s for image/video uploads
+const REQUEST_TIMEOUT_MS = 60000;
 
-function getApiUrl(): string | undefined {
-  return process.env.EVOLUTION_API_URL;
+interface BackendConfig {
+  backendType: "evolution" | "waha" | "custom";
+  baseUrl: string;
+  apiKey: string;
 }
 
-function getApiKey(): string | undefined {
-  return process.env.EVOLUTION_API_KEY;
+function getApiUrl(customConfig?: BackendConfig): string | undefined {
+  return customConfig?.baseUrl || process.env.EVOLUTION_API_URL;
+}
+
+function getApiKey(customConfig?: BackendConfig): string | undefined {
+  return customConfig?.apiKey || process.env.EVOLUTION_API_KEY;
+}
+
+function getBackendType(customConfig?: BackendConfig): string {
+  return customConfig?.backendType || "evolution";
 }
 
 function normalizeBaseUrl(url: string): string {
   return url.replace(/\/$/, "");
 }
 
-/**
- * Reusable axios instance with timeout and sane defaults.
- * Created lazily to avoid issues during module load.
- */
 let _client: AxiosInstance | null = null;
+let _currentBaseUrl = "";
+let _currentApiKey = "";
 
-function getClient(baseUrl: string, apiKey: string): AxiosInstance {
-  if (!_client) {
+function getClient(baseUrl: string, apiKey: string, backendType: string): AxiosInstance {
+  const normBaseUrl = normalizeBaseUrl(baseUrl);
+  
+  if (!_client || _currentBaseUrl !== normBaseUrl || _currentApiKey !== apiKey) {
     _client = axios.create({
       timeout: REQUEST_TIMEOUT_MS,
+      baseURL: normBaseUrl,
       headers: {
-        apikey: apiKey,
         "Content-Type": "application/json",
       },
     });
+    if (backendType === "waha") {
+      _client.defaults.headers["X-Api-Key"] = apiKey;
+    } else {
+      _client.defaults.headers["apikey"] = apiKey;
+    }
+    _currentBaseUrl = normBaseUrl;
+    _currentApiKey = apiKey;
   }
-  // Update base URL and key if config changed (hot reload scenario)
-  _client.defaults.baseURL = normalizeBaseUrl(baseUrl);
-  _client.defaults.headers.apikey = apiKey;
   return _client;
 }
 
-/**
- * Retry wrapper with exponential backoff.
- */
 async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES, isIdempotent = true): Promise<T> {
   try {
     return await fn();
@@ -54,15 +65,12 @@ async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES, isIdemp
 
     const error = err as { response?: { status?: number }; code?: string; message?: string };
     
-    // Don't retry client errors like 403, 401, 400 (except maybe 429)
     const isClientAuthError = error.response?.status && error.response.status >= 400 && error.response.status < 500 && error.response.status !== 429;
     const isTimeout = error.code === 'ECONNABORTED' || error.message?.toLowerCase().includes('timeout');
     const isServerError = error.response?.status && error.response.status >= 500;
 
-    // Do NOT retry on timeouts or server errors for non-idempotent requests (like posting stories)
-    // because the server might still be processing it and retrying will create duplicates.
     if (!isIdempotent && (isTimeout || isServerError)) {
-      console.warn(`[Evolution API] Request timed out or server error on non-idempotent action. Not retrying to prevent duplicates.`);
+      console.warn(`[API] Request timed out or server error on non-idempotent action. Not retrying.`);
       throw err;
     }
 
@@ -70,27 +78,31 @@ async function withRetry<T>(fn: () => Promise<T>, retries = MAX_RETRIES, isIdemp
       throw err;
     }
 
-    console.warn(`[Evolution API] Request failed, retrying... (${retries} left)`, error.message);
+    console.warn(`[API] Request failed, retrying... (${retries} left)`, error.message);
     await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
     return withRetry(fn, retries - 1, isIdempotent);
   }
 }
 
-export async function checkConnection(): Promise<boolean> {
-  const apiUrl = getApiUrl();
-  const apiKey = getApiKey();
+export async function checkConnection(config?: BackendConfig): Promise<boolean> {
+  const apiUrl = getApiUrl(config);
+  const apiKey = getApiKey(config);
+  const backendType = getBackendType(config);
 
   if (!apiUrl || !apiKey) return false;
 
-  const client = getClient(apiUrl, apiKey);
+  const client = getClient(apiUrl, apiKey, backendType);
 
-  // Try fetchInstances first
   try {
-    await client.get("/instance/fetchInstances");
+    if (backendType === "waha") {
+      await client.get("/api/sessions");
+    } else {
+      await client.get("/instance/fetchInstances");
+    }
     return true;
   } catch {
-    // Fallback to connectionState
     try {
+      if (backendType === "waha") return false;
       await client.get("/instance/connectionState");
       return true;
     } catch {
@@ -99,16 +111,30 @@ export async function checkConnection(): Promise<boolean> {
   }
 }
 
-export async function fetchInstances(): Promise<EvolutionInstance[]> {
-  const apiUrl = getApiUrl();
-  const apiKey = getApiKey();
+export async function fetchInstances(config?: BackendConfig): Promise<EvolutionInstance[]> {
+  const apiUrl = getApiUrl(config);
+  const apiKey = getApiKey(config);
+  const backendType = getBackendType(config);
 
   if (!apiUrl || !apiKey) {
-    throw new Error("Evolution API configuration is missing.");
+    throw new Error("API configuration is missing.");
   }
 
-  const client = getClient(apiUrl, apiKey);
+  const client = getClient(apiUrl, apiKey, backendType);
 
+  if (backendType === "waha") {
+    // WAHA fetch instances
+    const response = await withRetry(() => client.get("/api/sessions"));
+    const instancesRaw = response.data || [];
+    return instancesRaw.map((s: any) => ({
+      instanceName: s.name,
+      connectionStatus: s.status,
+      ownerJid: s.me?.id,
+      phoneNumber: s.me?.id ? s.me.id.split('@')[0] : undefined,
+    }));
+  }
+
+  // Evolution API
   const response = await withRetry(() =>
     client.get<EvolutionInstanceRaw[]>("/instance/fetchInstances")
   );
@@ -127,21 +153,46 @@ export async function fetchInstances(): Promise<EvolutionInstance[]> {
 
 export async function sendStatus(
   payload: StoryPayload,
-  instanceName: string
+  instanceName: string,
+  config?: BackendConfig
 ): Promise<unknown> {
-  const apiUrl = getApiUrl();
-  const apiKey = getApiKey();
+  const apiUrl = getApiUrl(config);
+  const apiKey = getApiKey(config);
+  const backendType = getBackendType(config);
 
   if (!apiUrl || !apiKey) {
-    throw new Error("Evolution API configuration is missing.");
+    throw new Error("API configuration is missing.");
   }
 
-  const client = getClient(apiUrl, apiKey);
+  const client = getClient(apiUrl, apiKey, backendType);
 
+  if (backendType === "waha") {
+    // Basic WAHA post story (text only for now as WAHA might require different format for image)
+    const wahaPayload: any = {
+      session: instanceName,
+      contacts: ["status@broadcast"],
+    };
+    if (payload.type === "text") {
+      wahaPayload.text = payload.content;
+      wahaPayload.backgroundColor = payload.backgroundColor;
+      wahaPayload.font = payload.font;
+    } else {
+      wahaPayload.image = payload.content;
+      wahaPayload.caption = payload.caption;
+    }
+    const response = await withRetry(
+      () => client.post(`/api/sendText`, wahaPayload),
+      MAX_RETRIES,
+      false
+    );
+    return response.data;
+  }
+
+  // Evolution API
   const response = await withRetry(
     () => client.post(`/message/sendStatus/${instanceName}`, payload),
     MAX_RETRIES,
-    false // not idempotent
+    false
   );
 
   return response.data;
@@ -155,11 +206,9 @@ function normalizeInstance(item: EvolutionInstanceRaw): EvolutionInstance {
   const name = (inst.instanceName || inst.name || item.instanceName || item.name) as string;
   const status = (inst.connectionStatus || inst.status || item.connectionStatus || item.status) as string;
 
-  // Extract phone number from owner JID (e.g. "628123456789@s.whatsapp.net" → "628123456789")
   const ownerJid = inst.ownerJid as string | undefined;
   const phoneNumber = ownerJid ? ownerJid.replace("@s.whatsapp.net", "") : undefined;
 
-  // Extract profile picture URL
   const profilePictureUrl = inst.profilePictureUrl as string | undefined;
   const profileName = inst.profileName as string | undefined;
 

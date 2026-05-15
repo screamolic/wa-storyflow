@@ -1,10 +1,8 @@
 import { Router, type Response } from "express";
 import { sendStatus } from "@/src/api/services/evolution";
-import { addEntry } from "@/src/api/services/activity-log";
 import { validatePostStory } from "@/src/api/services/validation";
 import type {
   StoryPayload,
-  ActivityLogEntry,
   ErrorResponse,
 } from "@/src/api/types";
 
@@ -22,7 +20,7 @@ router.post("/post-story", async (req, res) => {
     return;
   }
 
-  const { type, content, caption, backgroundColor, font, instanceName } = validation.data;
+  const { type, content, caption, backgroundColor, font, instanceName, config } = validation.data;
 
   const defaultInstance = process.env.EVOLUTION_INSTANCE_NAME;
   const targetInstance = instanceName || defaultInstance;
@@ -49,19 +47,7 @@ router.post("/post-story", async (req, res) => {
   }
 
   try {
-    const responseData = await sendStatus(payload, targetInstance);
-
-    const logEntry: ActivityLogEntry = {
-      id: Date.now(),
-      timestamp: new Date().toISOString(),
-      type,
-      instance: targetInstance,
-      status: "SUCCESS",
-      preview: type === "text" ? content.substring(0, 100) : "Image Story",
-      details: type === "text" ? content : caption || "Image Story",
-      response: responseData,
-    };
-    addEntry(logEntry);
+    const responseData = await sendStatus(payload, targetInstance, config);
 
     res.json(responseData);
   } catch (error: unknown) {
@@ -71,17 +57,6 @@ router.post("/post-story", async (req, res) => {
     };
     const errorMsg = err.response?.data || err.message;
     console.error("[PostStory] Evolution API Error:", errorMsg);
-
-    const logEntry: ActivityLogEntry = {
-      id: Date.now(),
-      timestamp: new Date().toISOString(),
-      type,
-      instance: targetInstance,
-      status: "FAILED",
-      preview: type === "text" ? content.substring(0, 100) : "Image Story",
-      error: typeof errorMsg === "string" ? errorMsg : JSON.stringify(errorMsg),
-    };
-    addEntry(logEntry);
 
     res.status(err.response?.status || 500).json(
       err.response?.data || { error: err.message }

@@ -34,7 +34,7 @@ export interface EvolutionInstance {
 }
 
 export interface HistoryEntry {
-  id: number;
+  id: string | number;
   timestamp: string;
   type: Format;
   instance: string;

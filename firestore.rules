@@ -1,0 +1,86 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidWhatsappConfig(data) {
+      return data.keys().hasAll(['backendType', 'baseUrl', 'updatedAt'])
+        && data.backendType is string
+        && data.backendType.size() <= 50
+        && (data.backendType == 'evolution' || data.backendType == 'waha' || data.backendType == 'custom')
+        && data.baseUrl is string
+        && data.baseUrl.size() <= 200
+        && data.updatedAt is number
+        && data.get('apiKey', '') is string
+        && data.get('instanceName', '') is string;
+    }
+
+    function isValidHistoryEntry(data) {
+      return data.keys().hasAll(['userId', 'timestamp', 'type', 'instance', 'status', 'preview'])
+        && data.userId is string
+        && data.timestamp is number
+        && data.type is string
+        && data.type.size() <= 20
+        && (data.type == 'text' || data.type == 'image')
+        && data.instance is string
+        && data.instance.size() <= 100
+        && data.status is string
+        && data.status.size() <= 20
+        && (data.status == 'SUCCESS' || data.status == 'FAILED')
+        && data.preview is string
+        && data.preview.size() <= 1000
+        && (data.get('details', '') is string)
+        && (data.get('error', '') is string);
+    }
+
+    match /users/{userId}/whatsappConfig/default {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId)
+                    && isValidId(userId)
+                    && isValidWhatsappConfig(incoming())
+                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'updatedAt'])
+                    && incoming().updatedAt == request.time.toMillis();
+      
+      allow update: if isOwner(userId)
+                    && isValidId(userId)
+                    && isValidWhatsappConfig(incoming())
+                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'updatedAt'])
+                    && incoming().updatedAt == request.time.toMillis();
+    }
+
+    match /users/{userId}/history/{historyId} {
+      allow read, delete: if isOwner(userId);
+      allow create: if isOwner(userId)
+                    && isValidId(userId)
+                    && isValidId(historyId)
+                    && isValidHistoryEntry(incoming())
+                    && incoming().userId == userId
+                    && incoming().timestamp == request.time.toMillis()
+                    // allow optional keys details and error:
+                    && incoming().keys().hasAny(['userId', 'timestamp', 'type', 'instance', 'status', 'preview', 'details', 'error']);
+    }
+  }
+}
