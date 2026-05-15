@@ -35,7 +35,11 @@ service cloud.firestore {
         && data.baseUrl.size() <= 200
         && data.updatedAt is number
         && data.get('apiKey', '') is string
-        && data.get('instanceName', '') is string;
+        && data.get('instanceName', '') is string
+        && data.get('aiProvider', '') is string
+        && data.get('aiModel', '') is string
+        && data.get('aiEndpoint', '') is string
+        && data.get('aiApiKey', '') is string;
     }
 
     function isValidHistoryEntry(data) {
@@ -61,13 +65,13 @@ service cloud.firestore {
       allow create: if isOwner(userId)
                     && isValidId(userId)
                     && isValidWhatsappConfig(incoming())
-                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'updatedAt'])
+                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'aiProvider', 'aiModel', 'aiEndpoint', 'aiApiKey', 'updatedAt'])
                     && incoming().updatedAt == request.time.toMillis();
       
       allow update: if isOwner(userId)
                     && isValidId(userId)
                     && isValidWhatsappConfig(incoming())
-                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'updatedAt'])
+                    && incoming().keys().hasOnly(['backendType', 'baseUrl', 'apiKey', 'instanceName', 'aiProvider', 'aiModel', 'aiEndpoint', 'aiApiKey', 'updatedAt'])
                     && incoming().updatedAt == request.time.toMillis();
     }
 

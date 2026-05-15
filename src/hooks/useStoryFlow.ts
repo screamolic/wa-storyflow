@@ -246,6 +246,10 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
               backendType: data.backendType || "evolution",
               baseUrl: data.baseUrl || "",
               apiKey: data.apiKey || "",
+              aiProvider: data.aiProvider || "gemini",
+              aiModel: data.aiModel || "",
+              aiEndpoint: data.aiEndpoint || "",
+              aiApiKey: data.aiApiKey || "",
             });
             if (data.instanceName) {
               setInstanceName(data.instanceName);
@@ -433,6 +437,7 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
         content: manualContent,
         autoStyling,
         aestheticMode,
+        aiConfig: backendConfig,
       });
       setManualContent(text || manualContent);
       wrapStatus({ type: "success", message: "Konten berhasil dipercantik!" });
@@ -449,7 +454,7 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
     wrapStatus(null);
     try {
       if (format === "image" && imageSource === "ai") {
-        const aiImg = await generateAIImage(prompt);
+        const aiImg = await generateAIImage(prompt, backendConfig);
         setImageUrl(aiImg);
       }
       const fullText = await generateStoryContent({
@@ -459,6 +464,7 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
         format,
         autoStyling,
         aestheticMode,
+        aiConfig: backendConfig,
       });
       const parts = format === "text" ? splitTextIntoStories(fullText) : [fullText];
       const randomBg = BG_COLORS[Math.floor(Math.random() * BG_COLORS.length)];

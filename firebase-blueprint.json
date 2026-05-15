@@ -18,6 +18,19 @@
         "instanceName": {
           "type": "string"
         },
+        "aiProvider": {
+          "type": "string",
+          "enum": ["gemini", "openai", "claude"]
+        },
+        "aiModel": {
+          "type": "string"
+        },
+        "aiEndpoint": {
+          "type": "string"
+        },
+        "aiApiKey": {
+          "type": "string"
+        },
         "updatedAt": {
           "type": "number",
           "description": "Timestamp of last update"
