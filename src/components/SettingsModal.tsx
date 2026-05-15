@@ -113,77 +113,77 @@ export default function SettingsModal({
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto"
+          className="bg-white rounded-3xl p-5 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto"
         >
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold flex items-center gap-2">
-              <Server className="w-5 h-5 text-gray-400" />
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-bold flex items-center gap-2">
+              <Server className="w-4 h-4 text-gray-400" />
               Pengaturan Sistem
             </h2>
             <button onClick={onClose} className="p-2 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 transition-colors">
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* WhatsApp Config */}
-            <div className="space-y-4">
-              <h3 className="font-bold text-gray-700 flex items-center gap-2 mb-2 border-b pb-2">
-                <i className="lab la-whatsapp text-xl text-green-500"></i> WhatsApp API
+            <div className="space-y-3">
+              <h3 className="font-bold text-gray-700 flex items-center gap-2 mb-1 border-b pb-1 text-sm">
+                <i className="lab la-whatsapp text-lg text-green-500"></i> WhatsApp API
               </h3>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold">Tipe Backend WhatsApp</label>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Tipe Backend WhatsApp</label>
                 <select
                   value={backendType}
                   onChange={(e) => setBackendType(e.target.value)}
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#25D366]"
+                  className="w-full p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#25D366]"
                 >
                   <option value="evolution">Evolution API</option>
                   <option value="waha">WAHA (WhatsApp HTTP API)</option>
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold">Base URL</label>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Base URL</label>
                 <div className="relative">
-                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                   <input
                     type="text"
                     value={baseUrl}
                     onChange={(e) => setBaseUrl(e.target.value)}
                     placeholder="https://api.example.com"
-                    className="w-full pl-10 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#25D366]"
+                    className="w-full pl-9 p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#25D366]"
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-semibold">Global API Key</label>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Global API Key</label>
                 <div className="relative">
-                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                   <input
                     type="password"
                     value={apiKey}
                     onChange={(e) => setApiKey(e.target.value)}
                     placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
-                    className="w-full pl-10 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-[#25D366]"
+                    className="w-full pl-9 p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-[#25D366]"
                   />
                 </div>
               </div>
             </div>
 
             {/* AI Config */}
-            <div className="space-y-4 pt-4">
-              <h3 className="font-bold text-gray-700 flex items-center gap-2 mb-2 border-b pb-2">
-                <Sparkles className="w-5 h-5 text-indigo-500" /> AI API (LLM)
+            <div className="space-y-3 pt-2">
+              <h3 className="font-bold text-gray-700 flex items-center gap-2 mb-1 border-b pb-1 text-sm">
+                <Sparkles className="w-4 h-4 text-indigo-500" /> AI API (LLM)
               </h3>
               
-              <div className="space-y-2">
-                <label className="text-sm font-semibold">Provider AI</label>
+              <div className="space-y-1">
+                <label className="text-xs font-semibold text-gray-600">Provider AI</label>
                 <select
                   value={aiProvider}
                   onChange={handleProviderChange}
-                  className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                 >
                   <option value="gemini">Google Gemini (Default)</option>
                   <option value="openai">OpenAI (ChatGPT)</option>
@@ -193,53 +193,53 @@ export default function SettingsModal({
 
               {aiProvider !== 'gemini' ? (
                 <>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">API Endpoint (Opsional)</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-600">API Endpoint (Opsional)</label>
                     <div className="relative">
-                      <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                       <input
                         type="text"
                         value={aiEndpoint}
                         onChange={(e) => setAiEndpoint(e.target.value)}
                         placeholder="https://api.openai.com/v1"
-                        className="w-full pl-10 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full pl-9 p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
                   </div>
 
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">API Key AI</label>
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-600">API Key AI</label>
                     <div className="relative">
-                      <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Key className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400" />
                       <input
                         type="password"
                         value={aiApiKey}
                         onChange={(e) => setAiApiKey(e.target.value)}
                         placeholder="sk-xxxxxxxxxxxxxxxx"
-                        className="w-full pl-10 p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full pl-9 p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     </div>
                   </div>
                   
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold flex items-center justify-between">
+                  <div className="space-y-1">
+                    <label className="text-xs font-semibold text-gray-600 flex items-center justify-between">
                       Nama Model
                       <button 
                         onClick={fetchModels}
                         disabled={isLoadingModels}
-                        className="text-xs text-indigo-500 flex items-center gap-1 hover:text-indigo-700 disabled:opacity-50"
+                        className="text-[10px] text-indigo-500 flex items-center gap-1 hover:text-indigo-700 disabled:opacity-50"
                       >
                          <RefreshCw className={`w-3 h-3 ${isLoadingModels ? 'animate-spin' : ''}`} /> Refresh Model
                       </button>
                     </label>
                     
-                    {fetchError && <p className="text-xs text-red-500">{fetchError}</p>}
+                    {fetchError && <p className="text-[10px] text-red-500">{fetchError}</p>}
                     
                     {availableModels.length > 0 ? (
                       <select
                         value={aiModel}
                         onChange={(e) => setAiModel(e.target.value)}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                       >
                         <option value="">-- Pilih Model --</option>
                         {availableModels.map(m => (
@@ -252,20 +252,20 @@ export default function SettingsModal({
                         value={aiModel}
                         onChange={(e) => setAiModel(e.target.value)}
                         placeholder={aiProvider === 'openai' ? "gpt-4o" : aiProvider === 'claude' ? "claude-3-5-sonnet-20240620" : "Default model akan digunakan jika kosong"}
-                        className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                     )}
                   </div>
                 </>
               ) : (
-                 <div className="space-y-2">
-                  <label className="text-sm font-semibold">Nama Model (Opsional)</label>
+                 <div className="space-y-1">
+                  <label className="text-xs font-semibold text-gray-600">Nama Model (Opsional)</label>
                   <input
                     type="text"
                     value={aiModel}
                     onChange={(e) => setAiModel(e.target.value)}
                     placeholder="gemini-2.5-pro"
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full p-2 text-sm bg-gray-50 border border-gray-200 rounded-lg outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               )}
@@ -273,9 +273,9 @@ export default function SettingsModal({
 
             <button
               onClick={handleSave}
-              className="w-full bg-[#1c1e21] text-white p-4 rounded-xl font-bold hover:bg-black transition-all flex items-center justify-center gap-2 mt-4"
+              className="w-full bg-[#1c1e21] text-white p-3 rounded-xl font-bold hover:bg-black transition-all flex items-center justify-center gap-2 mt-2 text-sm"
             >
-              <Save className="w-5 h-5" /> Simpan Pengaturan
+              <Save className="w-4 h-4" /> Simpan Pengaturan
             </button>
           </div>
         </motion.div>
