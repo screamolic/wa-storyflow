@@ -1,7 +1,7 @@
 import type { Response, NextFunction } from "express";
-import type { AuthRequest, AuthMiddleware } from "@/src/api/types";
+import type { AuthRequest, AuthMiddleware } from "../types";
 import admin from "firebase-admin";
-import firebaseConfig from "@/firebase-applet-config.json";
+import firebaseConfig from "../../../firebase-applet-config.json";
 
 // Initialize Firebase Admin only once
 if (!admin.apps.length) {

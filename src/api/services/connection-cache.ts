@@ -1,4 +1,4 @@
-import { checkConnection } from "@/src/api/services/evolution";
+import { checkConnection } from "../services/evolution";
 
 const CACHE_TTL_MS = 60_000; // 1 minute
 

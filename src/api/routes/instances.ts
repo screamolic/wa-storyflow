@@ -1,6 +1,6 @@
 import { Router, type Response, type Request } from "express";
-import { fetchInstances } from "@/src/api/services/evolution";
-import type { ErrorResponse } from "@/src/api/types";
+import { fetchInstances } from "../services/evolution";
+import type { ErrorResponse } from "../types";
 
 const router = Router();
 

@@ -1,10 +1,10 @@
 import { Router, type Response } from "express";
-import { sendStatus } from "@/src/api/services/evolution";
-import { validatePostStory } from "@/src/api/services/validation";
+import { sendStatus } from "../services/evolution";
+import { validatePostStory } from "../services/validation";
 import type {
   StoryPayload,
   ErrorResponse,
-} from "@/src/api/types";
+} from "../types";
 
 const router = Router();
 

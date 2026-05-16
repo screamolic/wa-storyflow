@@ -3,7 +3,7 @@ import type {
   EvolutionInstanceRaw,
   EvolutionInstance,
   StoryPayload,
-} from "@/src/api/types";
+} from "../types";
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1500;

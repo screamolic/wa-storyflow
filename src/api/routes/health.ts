@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { getConnectionStatus } from "@/src/api/services/connection-cache";
-import type { PingResponse, HealthCheckResponse } from "@/src/api/types";
+import { getConnectionStatus } from "../services/connection-cache";
+import type { PingResponse, HealthCheckResponse } from "../types";
 
 const router = Router();
 
