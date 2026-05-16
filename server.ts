@@ -3,10 +3,10 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import dotenv from "dotenv";
 import helmet from "helmet";
-import { createAuthMiddleware } from "@/src/api/middleware/auth";
-import healthRoutes from "@/src/api/routes/health";
-import instancesRoutes from "@/src/api/routes/instances";
-import postStoryRoutes from "@/src/api/routes/post-story";
+import { createAuthMiddleware } from "./src/api/middleware/auth";
+import healthRoutes from "./src/api/routes/health";
+import instancesRoutes from "./src/api/routes/instances";
+import postStoryRoutes from "./src/api/routes/post-story";
 
 dotenv.config();
 
