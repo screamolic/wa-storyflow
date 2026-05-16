@@ -69,6 +69,7 @@ export interface SuccessResponse {
 
 export interface AuthRequest extends Request {
   password?: string;
+  user?: any; // Contains the decoded Firebase ID token
 }
 
 export type AuthMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => void;

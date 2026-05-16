@@ -230,8 +230,16 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
     setProgress(0);
   }, [generatedContent?.currentIndex]);
 
-  const getHeaders = () => {
+  const getHeaders = async () => {
     const headers: Record<string, string> = {};
+    if (auth.currentUser) {
+      try {
+        const token = await auth.currentUser.getIdToken();
+        headers["Authorization"] = `Bearer ${token}`;
+      } catch (err) {
+        console.error("Failed to get ID token", err);
+      }
+    }
     if (appPassword) {
       headers["x-app-password"] = appPassword;
     }
@@ -319,7 +327,7 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
   const fetchInstances = async () => {
     setIsLoadingInstances(true);
     try {
-      const res = await axios.get("/api/instances", { headers: getHeaders() });
+      const res = await axios.get("/api/instances", { headers: await getHeaders() });
       let instances: unknown[] = [];
       if (Array.isArray(res.data)) {
         instances = res.data;
@@ -382,7 +390,7 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
 
   const checkConnection = async () => {
     try {
-      await axios.get("/api/instances", { headers: getHeaders() });
+      await axios.get("/api/instances", { headers: await getHeaders() });
       setConnectionStatus("connected");
     } catch {
       setConnectionStatus("disconnected");
@@ -516,7 +524,7 @@ export function useStoryFlow({ onStatusChange }: UseStoryFlowOptions) {
 
         let resultData: any = null;
         try {
-          const res = await axios.post("/api/post-story", payload, { headers: getHeaders() });
+          const res = await axios.post("/api/post-story", payload, { headers: await getHeaders() });
           resultData = res.data;
           
           if (userId) {

@@ -21,6 +21,7 @@
     "express": "^4.21.2",
     "fetch-blob": "^4.0.0",
     "firebase": "^12.13.0",
+    "firebase-admin": "^13.10.0",
     "helmet": "^8.1.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
