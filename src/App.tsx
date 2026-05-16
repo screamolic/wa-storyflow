@@ -150,7 +150,7 @@ export default function App() {
             {isServerReady === false && (
               <div className="p-4 bg-amber-50 border border-amber-100 rounded-2xl text-amber-700 text-xs font-medium mb-4 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
-                Node server lokal tidak merespon. Pastikan npm run dev sedang berjalan.
+                Backend API tidak merespon. Jika di lokal, pastikan npm run dev berjalan. Jika di Vercel, pastikan konfigurasi API sudah benar.
               </div>
             )}
 
